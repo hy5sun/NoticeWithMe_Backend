@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { IsEmail, IsEnum, IsString, MaxLength, MinLength } from "class-validator";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 
 export enum Role {
     Child = 'Child',
@@ -20,7 +20,7 @@ export class UserEntity {
     @MaxLength(20)
     userName: string;
 
-    @Column({name: 'email', unique:true})
+    @PrimaryColumn({name: 'email', unique:true})
     @Field((type) => String) // 필드의 타입: 문자열
     @IsEmail()
     userEmail: string;
@@ -42,4 +42,7 @@ export class UserEntity {
     @Column({name: 'school'})
     @Field((type) => String)
     userSchool: string;
+
+    //@Column({length: 60})
+    //signupVerifyToken: string;
 }

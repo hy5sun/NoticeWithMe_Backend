@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserEntity } from './entities/user.entity';
+import { Role, UserEntity } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
+  constructor(
+    @InjectRepository(UserEntity) private usersRepository: Repository<UserEntity>, // 유저 저장소 주입
+  ) {}
   users: UserEntity[] = [];
 
   async create(createUserDto: CreateUserDto) {
@@ -13,10 +18,7 @@ export class UsersService {
 
     try {
       if (this.users.find((user) => user.userEmail === userEmail)) {
-        return {
-          ok: false,
-          error: '해당 이메일의 유저는 이미 존재합니다.'
-        };
+        throw new UnprocessableEntityException('해당 이메일의 유저가 이미 존재합니다.');
       }
   
       if (userPw !== verifyPassword) {
@@ -41,7 +43,7 @@ export class UsersService {
       const hashedpassword = await bcrypt.hash(userPw, 10);
 
       const user: UserEntity = {
-        userName, userEmail, userPw: hashedpassword, userBd, userRole, userSchool
+        userName, userEmail, userPw: hashedpassword, userBd, userRole, userSchool,
       }
       this.users.push(user);
   
@@ -67,4 +69,29 @@ export class UsersService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+  // 유저 정보 저장
+  private async saveUser(
+    name: string, 
+    email: string, 
+    password: string,
+    birthday: string,
+    role: Role,
+    school: string,
+    //signupVerifyToken: string
+    ) {
+    const user = new UserEntity(); // 새로운 유저 엔티티 객체 생성
+    user.userName = name;
+    user.userEmail = email;
+    user.userPw = password;
+    user.userBd = birthday;
+    user.userRole = role;
+    user.userSchool = school;
+    //user.signupVerifyToken = signupVerifyToken;
+
+    await this.usersRepository.save(user);
+  }
+
+  // 존재 여부 확인
+
 }

@@ -5,8 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 
 @Module({
-  controllers: [UsersController],
-  providers: [UsersService],
+  controllers: [],
+  providers: [],
   imports: [TypeOrmModule.forFeature([UserEntity])], // userModule 내에 사용할 저장소 등록
 })
 export class UsersModule {}

@@ -43,6 +43,6 @@ export class UserEntity {
     @Field((type) => String)
     userSchool: string;
 
-    //@Column({length: 60})
-    //signupVerifyToken: string;
+    @Column({length: 60})
+    signupVerifyToken: string;
 }

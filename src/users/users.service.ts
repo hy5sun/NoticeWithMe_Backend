@@ -1,19 +1,23 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role, UserEntity } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AuthService } from 'src/auth/auth.service';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private authService: AuthService,
+    private userService: UsersService,
     @InjectRepository(UserEntity) private usersRepository: Repository<UserEntity>, // 유저 저장소 주입
   ) {}
   users: UserEntity[] = [];
 
-  async create(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto) {
     const {userName, userEmail, userPw, verifyPassword, userBd, userRole, userSchool} = createUserDto;
 
     try {
@@ -44,6 +48,7 @@ export class UsersService {
 
       const user: UserEntity = {
         userName, userEmail, userPw: hashedpassword, userBd, userRole, userSchool,
+        signupVerifyToken: ''
       }
       this.users.push(user);
   
@@ -58,8 +63,8 @@ export class UsersService {
     return this.users;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(email: string) {
+    return this.users.find((user) => email === user.userEmail);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -92,6 +97,25 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  // 존재 여부 확인
+// async validateUser(email: string, password: string): Promise<any> {
+//     const user = await this.userService.findOne(email);
+//     if (!user || (user && !bcrypt.compare(password, user.userPw))) {
+//       return {ok: false, error: "이메일 혹은 비밀번호가 틀렸습니다."};
+//     }
+//     return await this.userService.findOne(user.userEmail);
+// }
 
+//   async login(loginDto: LoginDto): Promise<string> {
+//     const {userEmail, userPw} = loginDto;
+//     const user = await this.usersRepository.findOne(user.userEmail);
+
+//     if (!user) {
+//       throw new NotFoundException('유저가 존재하지 않습니다.');
+//     }
+
+//     return this.authService.login({
+//       email: userEmail,
+//       password: userPw,
+//     });
+//   }
 }

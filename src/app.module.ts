@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 import * as Joi from 'joi';
 
 @Module({
-  imports: [UsersModule,
+  imports: [UsersModule, AuthModule,
     ConfigModule.forRoot({
       envFilePath: '.dev.env', //`.${process.env.NODE_ENV}.env`,
       isGlobal: true,
